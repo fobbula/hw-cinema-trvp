@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ЛК кассира — брони на сеансы</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <header class="header">
+    <div>
+      <h1><i class="fas fa-film"></i> Личный кабинет кассира</h1>
+      <div class="config-line" id="configLine">…</div>
+    </div>
+    <button class="btn btn-primary" id="btnNewSession">
+      <i class="fas fa-plus"></i> Добавить сеанс
+    </button>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <h2><i class="fas fa-calendar-alt"></i> Сеансы</h2>
+
+      <div class="hint">
+        <i class="fas fa-info-circle"></i> Проверка пересечений выполняется по времени <b>в том же зале</b> с учетом техпаузы.
+      </div>
+
+      <div class="table-wrap">
+        <table class="table" id="sessionsTable">
+          <thead>
+            <tr>
+              <th>Фильм</th>
+              <th>Дата/время</th>
+              <th>Длительность</th>
+              <th>Зал</th>
+              <th>Брони</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <div class="card-footer">
+        <span class="stats" id="sessionsStats">0 сеансов</span>
+      </div>
+    </section>
+
+    <section class="card" id="bookingsCard">
+      <h2><i class="fas fa-ticket-alt"></i> Брони</h2>
+      <div class="session-info" id="selectedSessionLine">
+        <div class="placeholder">Выберите сеанс…</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <form id="bookingForm" class="form">
+        <div class="row">
+          <label><i class="fas fa-user"></i> ФИО</label>
+          <input id="bName" type="text" placeholder="Иванов Иван Иванович" required />
+        </div>
+        <div class="row">
+          <label><i class="fas fa-ticket"></i> Билеты</label>
+          <div class="input-group">
+            <input id="bTickets" type="number" min="1" step="1" max="8" required />
+            <span class="input-hint">Макс: 8</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" id="bSubmit">
+            <i class="fas fa-check"></i> Добавить/суммировать
+          </button>
+          <button class="btn btn-secondary" type="button" id="bCancel" hidden>
+            <i class="fas fa-times"></i> Отмена
+          </button>
+        </div>
+
+        <input type="hidden" id="bEditingId" />
+      </form>
+
+      <div class="divider"></div>
+
+      <div class="table-wrap">
+        <table class="table" id="bookingsTable">
+          <thead>
+            <tr>
+              <th>ФИО</th>
+              <th>Билеты</th>
+              <th>Перебросить</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="hint">
+        <i class="fas fa-exchange-alt"></i> "Перебросить" можно только на сеанс с <b>тем же фильмом</b>.
+      </div>
+      
+      <div class="card-footer">
+        <span class="stats" id="bookingsStats">0 броней</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- Session modal -->
+  <div class="modal-backdrop" id="sessionModal" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="sessionModalTitle"><i class="fas fa-film"></i> Новый сеанс</h3>
+        <button class="icon-btn" id="closeSessionModal" aria-label="close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="sessionForm" class="form">
+        <div class="row">
+          <label><i class="fas fa-fingerprint"></i> ID</label>
+          <input id="sId" type="text" disabled placeholder="Будет создан автоматически" />
+        </div>
+
+        <div class="row">
+          <label><i class="fas fa-video"></i> Фильм</label>
+          <input id="sMovie" type="text" required placeholder="Название фильма" />
+        </div>
+
+        <div class="row">
+          <label><i class="fas fa-clock"></i> Дата и время</label>
+          <input id="sStart" type="datetime-local" required />
+        </div>
+
+        <div class="row">
+          <label><i class="fas fa-hourglass-half"></i> Продолжительность (чч:мм)</label>
+          <input id="sDuration" type="text" placeholder="02:15" required pattern="\d{1,2}:\d{2}" />
+        </div>
+
+        <div class="row">
+          <label><i class="fas fa-door-open"></i> Зал</label>
+          <select id="sHall" required></select>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" id="sSave">
+            <i class="fas fa-save"></i> Сохранить
+          </button>
+          <button class="btn btn-danger" type="button" id="sDelete" hidden>
+            <i class="fas fa-trash"></i> Удалить
+          </button>
+          <button class="btn btn-secondary" type="button" id="sCancel">
+            <i class="fas fa-times"></i> Отмена
+          </button>
+        </div>
+      </form>
+
+      <div class="hint">
+        <i class="fas fa-exclamation-triangle"></i> Если время пересекается с другим сеансом в том же зале (с учетом техпаузы) — сохранение будет запрещено.
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
